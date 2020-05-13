@@ -33,6 +33,13 @@ def rotate(image):
 X_train = np.apply_along_axis(rotate,1,X_train)
 X_test = np.apply_along_axis(rotate,1,X_test)
 
+while True:
+    cv2.imshow("i",X_train[2])
+    if cv2.waitKey(0) :
+        break
+cv2.destroyAllWindows()  
+plt.imshow(X_train[2])
+
 for i in range(100,109) :
     plt.subplot(330 + (i+1))
     plt.imshow(X_train[i])
@@ -83,6 +90,10 @@ def model_arch(input_shape) :
 
 
 model = model_arch((H,W,1))
+
+
+
+
 DIR = 'model-3'
 os.mkdir(DIR)
 callbacks = [
