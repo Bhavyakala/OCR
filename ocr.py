@@ -30,7 +30,7 @@ for i in range(len(contours)) :
         x,y,w,h = cv2.boundingRect(contours[i])
         boxes.append((x,y,w,h))
         new_contours.append(contours[i])
-        im1 = cv2.rectangle(orig1,(x-2,y-2),(x+w+2,y+h+2),(0,255,0),1)
+        # im1 = cv2.rectangle(orig1,(x-2,y-2),(x+w+2,y+h+2),(0,255,0),1)
 
 # avg = sum(h for _,_,_,h in boxes)/len(boxes)
 
@@ -61,16 +61,16 @@ for i in range(len(nb)) :
     for j in range(len(nb[i])) :
         x = nb[i][j][0]
         y = nb[i][j][1]
-        im1 = cv2.putText(im1,str(c), (x,y),cv2.FONT_HERSHEY_COMPLEX,1,[125])
+        # im1 = cv2.putText(im1,str(c), (x,y),cv2.FONT_HERSHEY_COMPLEX,1,[125])
         c+=1
 
 
-while True:
-    cv2.imshow("i",im1)
-    if cv2.waitKey(0) :
-        break
-cv2.destroyAllWindows()  
-plt.imshow(im1)
+# while True:
+#     cv2.imshow("i",im1)
+#     if cv2.waitKey(0) :
+#         break
+# cv2.destroyAllWindows()  
+# plt.imshow(im1)
 
 mapp = pd.read_csv('emnist/emnist-balanced-mapping.txt',delimiter=' ', 
                    index_col=0,
@@ -91,16 +91,25 @@ for i in range(len(nb)) :
         im = np.pad(im,8,constant_values=255)
         im = cv2.resize(im,(28,28))
         im = cv2.bitwise_not(im)
-        plt.imshow(im)
+        # plt.imshow(im)
 
         im = np.expand_dims(im,axis=0)
         im = np.expand_dims(im,axis=3)
         pred = model.predict(im)
         idx = np.argmax(pred,axis=1)
         value = chr(mapp[idx])
-        
-        plt.title(value)
-        c+=1
+        # plt.title(value)
+        imp = cv2.rectangle(orig1,(x-2,y-2),(x+w+2,y+h+2),(0,255,0),1)
+        imp = cv2.putText(imp,str(value), (x,y),cv2.FONT_HERSHEY_COMPLEX,1,[125])
+        cv2.imshow("im",imp)
+        cv2.waitKey(0)
+        c+=1       
+cv2.destroyAllWindows()         
 
+# while True:
+#     cv2.imshow("i",im1)
+#     if cv2.waitKey(0) :
+#         break
+# cv2.destroyAllWindows()
 
 
