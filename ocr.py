@@ -6,12 +6,13 @@ import os
 import cv2
 import json
 
-# path = 'D:/Coding_wo_cp/OCR/0325updated.task1train(626p)/X00016469619.jpg'
+path = 'D:/Coding_wo_cp/OCR/download.png'
+# path = 'D:/Coding_wo_cp/OCR/0325updated.task1train(626p)/X00016469612.jpg'
 # path = 'D:/Coding_wo_cp/ML_CHALLENGE_HACKEREARTH/01e648028ad911ea/Dataset/Train_images/TR_2.jpg'
-path = 'helloworld.png'
+# path = 'helloworld.png'
 image = cv2.imread(path)
 orig = image.copy() 
-orig1 = image.copy()
+orig1 = image.copy()          
 gray = cv2.cvtColor(image,cv2.COLOR_BGR2GRAY)
 h,w = orig.shape[:2]
 print(orig.shape)
@@ -32,13 +33,14 @@ for i in range(len(contours)) :
         new_contours.append(contours[i])
         # im1 = cv2.rectangle(orig1,(x-2,y-2),(x+w+2,y+h+2),(0,255,0),1)
 
-# avg = sum(h for _,_,_,h in boxes)/len(boxes)
+tolerance = 3
+avgH = sum(h for _,_,_,h in boxes)/len(boxes)
+avgW = sum(h for _,_,w,_ in boxes)/len(boxes)
 
 boxes.sort(key= lambda x :(x[1]+x[3]))
-nb = []
+xySortedBoxes = []
 temp = []
 for i in range(1,(len(boxes))) :
-    tolerance = 5
     x,y,w,h = boxes[i-1]
     x1,y1,w1,h1 = boxes[i]
 
@@ -47,20 +49,25 @@ for i in range(1,(len(boxes))) :
         if i==len(boxes)-1 :
             temp.append(boxes[i])
     else :
+        temp.append((boxes[i-1]))
         if len(temp)>0 :
-            nb.append(temp)
+            xySortedBoxes.append(temp)
             temp=[]
     # print(y+h)
 if len(temp)>0:
-    nb.append(temp)
+    xySortedBoxes.append(temp) 
 
+for lst in xySortedBoxes:
+    for box in lst:     
+        if box[3] < avgH-tolerance:
+            lst.remove(box)
 
 c=1
-for i in range(len(nb)) :
-    nb[i].sort(key = lambda x: x[0])
-    for j in range(len(nb[i])) :
-        x = nb[i][j][0]
-        y = nb[i][j][1]
+for i in range(len(xySortedBoxes)) :
+    xySortedBoxes[i].sort(key = lambda x: x[0]) 
+    for j in range(len(xySortedBoxes[i])) :
+        x = xySortedBoxes[i][j][0]
+        y = xySortedBoxes[i][j][1]
         # im1 = cv2.putText(im1,str(c), (x,y),cv2.FONT_HERSHEY_COMPLEX,1,[125])
         c+=1
 
@@ -78,14 +85,14 @@ mapp = pd.read_csv('emnist/emnist-balanced-mapping.txt',delimiter=' ',
                    squeeze=True)
 model = tf.keras.models.load_model('D:/Coding_wo_cp/OCR/model-3/model_5.h5')
 
-
+f=0
 c=1
-for i in range(len(nb)) :
-    for j in range(len(nb[i])) :
+for i in range(len(xySortedBoxes)) :
+    for j in range(len(xySortedBoxes[i])) :
 
-        plt.subplot(3,4,c)
+        # plt.subplot(3,4,c)
         
-        x,y,w,h=nb[i][j]
+        x,y,w,h=xySortedBoxes[i][j]
         im = orig[y-2:y+h+2,x-2:x+w+2]
         im = cv2.cvtColor(im,cv2.COLOR_BGR2GRAY)
         im = np.pad(im,8,constant_values=255)
@@ -102,8 +109,13 @@ for i in range(len(nb)) :
         imp = cv2.rectangle(orig1,(x-2,y-2),(x+w+2,y+h+2),(0,255,0),1)
         imp = cv2.putText(imp,str(value), (x,y),cv2.FONT_HERSHEY_COMPLEX,1,[125])
         cv2.imshow("im",imp)
-        cv2.waitKey(0)
-        c+=1       
+        if cv2.waitKey(0) & 0xFF == ord("q") :
+            f=1
+            break
+        c+=1    
+
+    if f==1 :
+        break    
 cv2.destroyAllWindows()         
 
 # while True:
